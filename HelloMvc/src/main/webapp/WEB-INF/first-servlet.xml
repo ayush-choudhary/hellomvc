@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<context:annotation-config /><!-- ANNOTATION BASED CONFIG -->
+	<context:component-scan base-package="my" /><!-- 
+		SCAN pkg and instantiate CLasses -->
+	<mvc:annotation-driven /><!-- HandlerMApping and HandlerAdapter -->
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/alpha/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!--  Layerd Architeure -->
+	
+	<bean id="service" class="my.AccountServiceImpl">
+	
+	<constructor-arg ref="dao" />
+	</bean>
+	
+	
+	<bean id="dao" class="my.AccountDaoimpl"/>
+	
+<!-- DATA SOURCE -->
+	<bean id="ds"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="url" value="jdbc:mysql://localhost:3306/lab8" />
+		<property name="password" value="root" />
+		<property name="username" value="root" />
+		<property name="driverClassName"
+			value="com.mysql.jdbc.Driver" />
+
+	</bean>
+<!-- Spring Equivalent EntiryManagerFactory -->
+
+	<bean id="emf"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="ds" />
+<!-- Hibernate Properties -->
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+			</props>
+
+		</property>
+		<!-- Package of entity Class -->
+		<property name="packagesToScan" value="my" />
+		
+		<!-- Reference Class of EntityManager -->
+<property name="jpaVendorAdapter">
+<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+         </property>
+	</bean>
+	<!-- Spring equivalent of JpaTransactionManager -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.jpa.JpaTransactionManager">
+
+		<property name="entityManagerFactory" ref="emf" />
+	</bean>
+	<tx:annotation-driven
+		transaction-manager="transactionManager" />
+</beans>
